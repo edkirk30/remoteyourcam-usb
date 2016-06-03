@@ -215,6 +215,12 @@ public class PtpUsbService implements PtpService {
                         device.getVendorId(), device.getProductId());
                 camera = new NikonCamera(connection, listener, new WorkerNotifier(context));
             }
+            else {
+                PtpUsbConnection connection = new PtpUsbConnection(usbManager.openDevice(device), in, out,
+                        device.getVendorId(), device.getProductId());
+                camera = new GenericCamera(connection, listener, new WorkerNotifier(context));
+
+            }
 
             return true;
         }

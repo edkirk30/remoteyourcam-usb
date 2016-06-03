@@ -38,15 +38,18 @@ import org.acra.ErrorReporter;
 import com.remoteyourcam.usb.AppConfig;
 import com.remoteyourcam.usb.ptp.commands.CloseSessionCommand;
 import com.remoteyourcam.usb.ptp.commands.Command;
+import com.remoteyourcam.usb.ptp.commands.DeleteImageAction;
 import com.remoteyourcam.usb.ptp.commands.GetDeviceInfoCommand;
 import com.remoteyourcam.usb.ptp.commands.GetDevicePropValueCommand;
 import com.remoteyourcam.usb.ptp.commands.GetObjectHandlesCommand;
 import com.remoteyourcam.usb.ptp.commands.GetStorageInfosAction;
+import com.remoteyourcam.usb.ptp.commands.DeleteObjectCommand;
 import com.remoteyourcam.usb.ptp.commands.InitiateCaptureCommand;
 import com.remoteyourcam.usb.ptp.commands.OpenSessionCommand;
 import com.remoteyourcam.usb.ptp.commands.RetrieveImageAction;
 import com.remoteyourcam.usb.ptp.commands.RetrieveImageInfoAction;
 import com.remoteyourcam.usb.ptp.commands.RetrievePictureAction;
+import com.remoteyourcam.usb.ptp.commands.SaveAndDeleteAction;
 import com.remoteyourcam.usb.ptp.commands.SetDevicePropValueCommand;
 import com.remoteyourcam.usb.ptp.model.DeviceInfo;
 import com.remoteyourcam.usb.ptp.model.DevicePropDesc;
@@ -655,6 +658,7 @@ public abstract class PtpCamera implements Camera {
                             r3.queue(bigIn3, nextSize3);
                         }
 
+
                         if (nextSize > 0) {
                             connection.requestWait();
                             System.arraycopy(bigIn1.array(), 0, infull.array(), read, nextSize);
@@ -855,6 +859,21 @@ public abstract class PtpCamera implements Camera {
             writer.close();
         } catch (IOException e) {
         }
+    }
+
+    @Override
+    //FIXME ok here? or move out?
+    public void saveAndDeletePicture(int objectHandle, String savePath) {
+
+        Log.i(TAG, "saveAndDeletePicture");
+        queue.add(new SaveAndDeleteAction(this, objectHandle, savePath));
+    }
+
+    @Override
+    public void deletePicture(int objectHandle) {
+
+        Log.i(TAG, "deletePicture");
+        queue.add(new DeleteImageAction(this, objectHandle));
     }
 
     @Override

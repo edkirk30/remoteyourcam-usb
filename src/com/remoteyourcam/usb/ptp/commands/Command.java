@@ -79,7 +79,7 @@ public abstract class Command implements PtpAction {
         }
     }
 
-    /**
+    /*
      * Override if any special response data has to be decoded. The
      * {@code ByteBuffer} already points to the first byte behind the
      * transaction id, i.e. the payload.

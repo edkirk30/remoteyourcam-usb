@@ -22,7 +22,9 @@ import java.util.Date;
 import android.app.FragmentTransaction;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -309,15 +311,29 @@ public class GalleryFragment extends SessionFragment implements Camera.StorageIn
                 return;
             }
             holder.done = true;
+
+            Log.i("onNewListItemCreated", "retrieveImageInfo");
+
             camera.retrieveImageInfo(this, holder.objectHandle);
         }
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+        Log.i("onItemClick", "deletePicture");
+
+        //camera().deletePicture(galleryAdapter.getItemHandle(position));
+        //camera().saveAndDeletePicture(galleryAdapter.getItemHandle(position), getActivity().getExternalCacheDir() + "/test.jpg");
+        //camera().saveAndDeletePicture(galleryAdapter.getItemHandle(position), "/mnt/shell/emulated/0/DCIM" + "/test.jpg");
+        camera().saveAndDeletePicture(galleryAdapter.getItemHandle(position), Environment.getExternalStorageDirectory().toString() + "/test.jpg");
+        /*
+
         FragmentTransaction ft = getFragmentManager().beginTransaction();
+
         ft.replace(R.id.fragment_container, PictureFragment.newInstance(galleryAdapter.getItemHandle(position)), null);
         ft.addToBackStack(null);
         ft.commit();
+        */
     }
 }

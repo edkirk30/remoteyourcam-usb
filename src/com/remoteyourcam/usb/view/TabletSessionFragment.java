@@ -25,6 +25,7 @@ import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -263,6 +264,7 @@ public class TabletSessionFragment extends SessionFragment implements GestureDet
                     if (camera() == null) {
                         return;
                     }
+                    Log.i("setOnItemClickListener", "HERE");
                     liveView.setPicture(null);
                     camera().retrievePicture(thumbnailAdapter.getItemHandle(position));
                 }
@@ -656,6 +658,9 @@ public class TabletSessionFragment extends SessionFragment implements GestureDet
                 camera().retrieveImageInfo(this, handle);
                 handler.post(liveViewRestarterRunner);
             } else {
+
+
+                Log.i("retrievePicture", "HERE");
                 camera().retrievePicture(handle);
             }
         }

@@ -179,6 +179,10 @@ public interface Camera {
 
     void retrievePicture(int objectHandle);
 
+    void deletePicture(int objectHandle);
+
+    void saveAndDeletePicture(int objectHandle, String savePath);
+
     void retrieveStorages(StorageInfoListener listener);
 
     void retrieveImageHandles(StorageInfoListener listener, int storageId, int objectFormat);
