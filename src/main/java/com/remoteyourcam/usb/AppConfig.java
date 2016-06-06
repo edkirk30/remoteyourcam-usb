@@ -13,18 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.remoteyourcam.usb.view;
+package com.remoteyourcam.usb;
 
-import android.app.Activity;
+public class AppConfig {
+    public static final boolean LOG = true;
+    public static final boolean USE_ACRA = false;
+    public static final boolean LOG_PACKETS = false;
 
-import com.remoteyourcam.usb.AppSettings;
-import com.remoteyourcam.usb.ptp.Camera;
-
-public abstract class SessionActivity extends Activity {
-
-    public abstract Camera getCamera();
-
-    public abstract void setSessionView(SessionView view);
-
-    public abstract AppSettings getSettings();
+    public static final int EVENTCHECK_PERIOD = 700;
+    public static final int USB_TRANSFER_TIMEOUT = 30000;
 }

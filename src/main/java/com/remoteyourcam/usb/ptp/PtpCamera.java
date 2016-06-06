@@ -33,7 +33,7 @@ import android.hardware.usb.UsbRequest;
 import android.os.Handler;
 import android.util.Log;
 
-import org.acra.ErrorReporter;
+//import org.acra.ErrorReporter;
 
 import com.remoteyourcam.usb.AppConfig;
 import com.remoteyourcam.usb.ptp.commands.CloseSessionCommand;
@@ -194,7 +194,7 @@ public abstract class PtpCamera implements Camera {
         }
         if (AppConfig.USE_ACRA) {
             try {
-                ErrorReporter.getInstance().putCustomData("deviceInfo", deviceInfo.toString());
+                //ErrorReporter.getInstance().putCustomData("deviceInfo", deviceInfo.toString());
             } catch (Throwable e) {
                 // no fail
             }
@@ -792,6 +792,9 @@ public abstract class PtpCamera implements Camera {
 
     @Override
     public Integer propertyToIcon(int property, int value) {
+
+        return null;
+        /*
         Integer ptpProperty = virtualToPtpProperty.get(property);
         if (ptpProperty != null) {
             Integer iconId = PtpPropertyHelper.mapToDrawable(ptpProperty, value);
@@ -799,6 +802,7 @@ public abstract class PtpCamera implements Camera {
         } else {
             return null;
         }
+        */
     }
 
     @Override

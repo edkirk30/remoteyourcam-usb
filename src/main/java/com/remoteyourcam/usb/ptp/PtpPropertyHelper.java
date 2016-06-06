@@ -18,7 +18,7 @@ package com.remoteyourcam.usb.ptp;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.remoteyourcam.usb.R;
+//import com.remoteyourcam.usb.R;
 import com.remoteyourcam.usb.ptp.PtpConstants.Product;
 import com.remoteyourcam.usb.ptp.PtpConstants.Property;
 
@@ -303,7 +303,7 @@ public class PtpPropertyHelper {
         }
         return null;
     }
-
+/*
     public static Integer mapToDrawable(int property, int value) {
         switch (property) {
         case Property.EosWhitebalance: {
@@ -342,6 +342,7 @@ public class PtpPropertyHelper {
             return null;
         }
     }
+    */
 
     public static String getBiggestValue(int property) {
         switch (property) {
@@ -544,7 +545,7 @@ public class PtpPropertyHelper {
         eosWhitebalanceMap.put(19, "Manual");
         eosWhitebalanceMap.put(20, "PC-4");
         eosWhitebalanceMap.put(21, "PC-5");
-
+/*
         eosWhitebalanceIconsMap.put(0, R.drawable.whitebalance_auto);
         eosWhitebalanceIconsMap.put(1, R.drawable.whitebalance_daylight);
         eosWhitebalanceIconsMap.put(2, R.drawable.whitebalance_cloudy);
@@ -563,6 +564,7 @@ public class PtpPropertyHelper {
         eosWhitebalanceIconsMap.put(19, R.drawable.whitebalance_manual5);
         eosWhitebalanceIconsMap.put(20, R.drawable.whitebalance_custom4);
         eosWhitebalanceIconsMap.put(21, R.drawable.whitebalance_custom5);
+        */
 
         eosShootingModeMap.put(0, "Program AE");
         eosShootingModeMap.put(1, "Shutter-Speed Priority AE");
@@ -580,7 +582,7 @@ public class PtpPropertyHelper {
         eosShootingModeMap.put(14, "Close-Up");
         eosShootingModeMap.put(15, "Flash Off");
         eosShootingModeMap.put(19, "Creative Auto");
-
+/*
         eosShootingModeIconsMap.put(0, R.drawable.shootingmode_program);
         eosShootingModeIconsMap.put(1, R.drawable.shootingmode_tv);
         eosShootingModeIconsMap.put(2, R.drawable.shootingmode_av);
@@ -597,7 +599,7 @@ public class PtpPropertyHelper {
         eosShootingModeIconsMap.put(14, R.drawable.shootingmode_close_up);
         eosShootingModeIconsMap.put(15, R.drawable.shootingmode_flash_off);
         eosShootingModeIconsMap.put(19, R.drawable.shootingmode_creativeauto);
-
+*/
         eosDriveModeMap.put(0, "Single Shooting");
         eosDriveModeMap.put(1, "Continuous Shooting");
         eosDriveModeMap.put(2, "Video");
@@ -625,7 +627,7 @@ public class PtpPropertyHelper {
         nikonWhitebalanceMap.put(0x8011, "Sunny shade");
         nikonWhitebalanceMap.put(0x8012, "Color temperature");
         nikonWhitebalanceMap.put(0x8013, "Preset");
-
+/*
         nikonWhitebalanceIconsMap.put(2, R.drawable.whitebalance_auto);
         nikonWhitebalanceIconsMap.put(4, R.drawable.whitebalance_daylight);
         nikonWhitebalanceIconsMap.put(5, R.drawable.whitebalance_fluorescent);
@@ -635,7 +637,7 @@ public class PtpPropertyHelper {
         nikonWhitebalanceIconsMap.put(0x8011, R.drawable.whitebalance_shade);
         nikonWhitebalanceIconsMap.put(0x8012, R.drawable.whitebalance_color_temperature);
         nikonWhitebalanceIconsMap.put(0x8013, R.drawable.whitebalance_custom1); // TODO create Nikon specific icon
-
+*/
         nikonExposureIndexMap.put(0x0064, "100");
         nikonExposureIndexMap.put(0x007D, "125");
         nikonExposureIndexMap.put(0x00A0, "160");
@@ -665,6 +667,7 @@ public class PtpPropertyHelper {
         nikonExposureIndexMap.put(0x2710, "10000");
         nikonExposureIndexMap.put(0x3200, "12800");
 
+        /*
         nikonExposureProgramMap.put(0x0001, R.drawable.shootingmode_m);
         nikonExposureProgramMap.put(0x0002, R.drawable.shootingmode_program);
         nikonExposureProgramMap.put(0x0003, R.drawable.shootingmode_av);
@@ -680,6 +683,8 @@ public class PtpPropertyHelper {
         nikonExposureProgramMap.put(0x8018, R.drawable.shootingmode_unknown); // TODO SCENE
         nikonExposureProgramMap.put(0x8050, R.drawable.shootingmode_unknown); // TODO User mode U1
         nikonExposureProgramMap.put(0x8051, R.drawable.shootingmode_unknown); // TODO User mode U2
+
+*/
 
         nikonWbColorTempD300SMap.put(0, "2500K");
         nikonWbColorTempD300SMap.put(1, "2560K");
@@ -770,7 +775,7 @@ public class PtpPropertyHelper {
         nikonActivePicCtrlItemMap.put(207, "C-7");
         nikonActivePicCtrlItemMap.put(208, "C-8");
         nikonActivePicCtrlItemMap.put(209, "C-9");
-
+/*
         nikonMeteringModeMap.put(2, R.drawable.metering_exposure_center_weighted_nikon);
         nikonMeteringModeMap.put(3, R.drawable.metering_exposure_matrix_nikon);
         nikonMeteringModeMap.put(4, R.drawable.metering_exposure_spot);
@@ -779,16 +784,18 @@ public class PtpPropertyHelper {
         eosMeteringModeIconsMap.put(3, R.drawable.metering_exposure_evaluative_canon);
         eosMeteringModeIconsMap.put(4, R.drawable.metering_exposure_partial);
         eosMeteringModeIconsMap.put(5, R.drawable.metering_exposure_center_weighted_average_canon);
-
+*/
         nikonFocusMeteringModeMap.put(0x0002, "Dynamic");
         nikonFocusMeteringModeMap.put(0x8010, "Single point");
         nikonFocusMeteringModeMap.put(0x8011, "Auto area");
         nikonFocusMeteringModeMap.put(0x8012, "3D");
 
+        /*
         nikonFocusMeteringModeIconsMap.put(0x0002, R.drawable.metering_af_dynamic_area);
         nikonFocusMeteringModeIconsMap.put(0x8010, R.drawable.metering_af_single_point);
         nikonFocusMeteringModeIconsMap.put(0x8011, R.drawable.metering_af_auto_area);
         nikonFocusMeteringModeIconsMap.put(0x8012, R.drawable.metering_af_3d_tracking);
+        */
 
         eosPictureStyleMap.put(0x81, "ST");
         eosPictureStyleMap.put(0x82, "PT");
