@@ -15,15 +15,19 @@
  */
 package com.remoteyourcam.usb.ptp.commands;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Environment;
 import android.util.Log;
 
 import com.remoteyourcam.usb.ptp.PtpCamera;
 import com.remoteyourcam.usb.ptp.PtpCamera.IO;
 import com.remoteyourcam.usb.ptp.PtpConstants;
+import com.remoteyourcam.usb.ptp.model.JpegByteBuffer;
 
 /**
  * Read file data from camera with specified {@code objectHandle}.
@@ -36,6 +40,7 @@ public class GetObjectCommand extends Command {
 
     private final BitmapFactory.Options options;
     private Bitmap inBitmap;
+    private JpegByteBuffer localBuffer = null;
 
     private boolean outOfMemoryError;
 
@@ -52,6 +57,10 @@ public class GetObjectCommand extends Command {
 
     public Bitmap getBitmap() {
         return inBitmap;
+    }
+
+    public JpegByteBuffer getBuffer() {
+        return localBuffer;
     }
 
     public boolean isOutOfMemoryError() {
@@ -76,10 +85,24 @@ public class GetObjectCommand extends Command {
     }
 
     @Override
-    protected void decodeData(ByteBuffer b, int length) {
+    protected void decodeData(ByteBuffer buffer, int length) {
+
+        Log.v(TAG, "decodeData length:" + length);
+
         try {
             // 12 == offset of data header
-            inBitmap = BitmapFactory.decodeByteArray(b.array(), 12, length - 12, options);
+            //inBitmap = BitmapFactory.decodeByteArray(buffer.array(), 12, length - 12, options);
+
+            //Copy buffer
+            localBuffer = new JpegByteBuffer();
+            localBuffer.bufferLength = length;
+            localBuffer.bufferOffset = 12;
+            localBuffer.buffer = ByteBuffer.allocate(buffer.capacity());
+            buffer.rewind();
+            localBuffer.buffer.put(buffer);
+            buffer.rewind();
+            localBuffer.buffer.flip();
+
         } catch (RuntimeException e) {
             Log.i(TAG, "exception on decoding picture : " + e.toString());
         } catch (OutOfMemoryError e) {

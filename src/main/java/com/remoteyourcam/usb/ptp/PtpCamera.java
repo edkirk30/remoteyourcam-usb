@@ -20,9 +20,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -42,18 +44,23 @@ import com.remoteyourcam.usb.ptp.commands.DeleteImageAction;
 import com.remoteyourcam.usb.ptp.commands.GetDeviceInfoCommand;
 import com.remoteyourcam.usb.ptp.commands.GetDevicePropValueCommand;
 import com.remoteyourcam.usb.ptp.commands.GetObjectHandlesCommand;
+import com.remoteyourcam.usb.ptp.commands.GetObjectInfoCommand;
 import com.remoteyourcam.usb.ptp.commands.GetStorageInfosAction;
 import com.remoteyourcam.usb.ptp.commands.DeleteObjectCommand;
 import com.remoteyourcam.usb.ptp.commands.InitiateCaptureCommand;
+import com.remoteyourcam.usb.ptp.commands.MoveObjectCommand;
 import com.remoteyourcam.usb.ptp.commands.OpenSessionCommand;
 import com.remoteyourcam.usb.ptp.commands.RetrieveImageAction;
 import com.remoteyourcam.usb.ptp.commands.RetrieveImageInfoAction;
 import com.remoteyourcam.usb.ptp.commands.RetrievePictureAction;
 import com.remoteyourcam.usb.ptp.commands.SaveAndDeleteAction;
+import com.remoteyourcam.usb.ptp.commands.SendObjectCommand;
 import com.remoteyourcam.usb.ptp.commands.SetDevicePropValueCommand;
+import com.remoteyourcam.usb.ptp.commands.SetObjectInfoCommand;
 import com.remoteyourcam.usb.ptp.model.DeviceInfo;
 import com.remoteyourcam.usb.ptp.model.DevicePropDesc;
 import com.remoteyourcam.usb.ptp.model.LiveViewData;
+import com.remoteyourcam.usb.ptp.model.ObjectInfo;
 
 public abstract class PtpCamera implements Camera {
 
@@ -81,7 +88,8 @@ public abstract class PtpCamera implements Camera {
 
     protected final Handler handler = new Handler();
     protected final LinkedBlockingQueue<PtpAction> queue = new LinkedBlockingQueue<PtpAction>();
-    protected CameraListener listener;
+    //protected CameraListener listener;
+    protected List<CameraListener> listeners = new ArrayList();
     protected State state;
 
     private int transactionId;
@@ -116,9 +124,9 @@ public abstract class PtpCamera implements Camera {
     private WorkerListener workerListener;
     private int pictureSampleSize;
 
-    public PtpCamera(PtpUsbConnection connection, CameraListener listener, WorkerListener workerListener) {
+    public PtpCamera(PtpUsbConnection connection, List<CameraListener> listeners, WorkerListener workerListener) {
         this.connection = connection;
-        this.listener = listener;
+        this.listeners = listeners;
         this.workerListener = workerListener;
         this.pictureSampleSize = 2;
         state = State.Starting;
@@ -141,8 +149,9 @@ public abstract class PtpCamera implements Camera {
         ptpInternalProperties.add(ptp);
     }
 
-    public void setListener(CameraListener listener) {
-        this.listener = listener;
+    public void addListener(CameraListener listener) {
+
+        this.listeners.add(listener);
     }
 
     public void shutdown() {
@@ -237,7 +246,7 @@ public abstract class PtpCamera implements Camera {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                if (listener != null) {
+                for (CameraListener listener : listeners) {
                     listener.onCameraStarted(PtpCamera.this);
                 }
             }
@@ -249,7 +258,7 @@ public abstract class PtpCamera implements Camera {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                if (listener != null) {
+                for (CameraListener listener : listeners) {
                     listener.onCameraStopped(PtpCamera.this);
                 }
             }
@@ -269,7 +278,7 @@ public abstract class PtpCamera implements Camera {
                 @Override
                 public void run() {
                     properties.put(virtual, value);
-                    if (listener != null) {
+                    for (CameraListener listener : listeners) {
                         listener.onPropertyChanged(virtual, value);
                     }
                 }
@@ -289,7 +298,7 @@ public abstract class PtpCamera implements Camera {
                 @Override
                 public void run() {
                     propertyDescriptions.put(virtual, values);
-                    if (listener != null) {
+                    for (CameraListener listener : listeners) {
                         listener.onPropertyDescChanged(virtual, values);
                     }
                 }
@@ -307,7 +316,7 @@ public abstract class PtpCamera implements Camera {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                if (listener != null) {
+                for (CameraListener listener : listeners) {
                     listener.onLiveViewStarted();
                 }
             }
@@ -319,7 +328,7 @@ public abstract class PtpCamera implements Camera {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                if (listener != null) {
+                for (CameraListener listener : listeners) {
                     listener.onLiveViewStarted();
                 }
             }
@@ -331,7 +340,7 @@ public abstract class PtpCamera implements Camera {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                if (listener != null) {
+                for (CameraListener listener : listeners) {
                     listener.onLiveViewStopped();
                 }
             }
@@ -342,7 +351,7 @@ public abstract class PtpCamera implements Camera {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                if (listener != null) {
+                for (CameraListener listener : listeners) {
                     listener.onLiveViewData(data);
                 }
             }
@@ -354,7 +363,7 @@ public abstract class PtpCamera implements Camera {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                if (listener != null) {
+                for (CameraListener listener : listeners) {
                     listener.onCapturedPictureReceived(objectHandle, filename, thumbnail, bitmap);
                 }
             }
@@ -367,7 +376,7 @@ public abstract class PtpCamera implements Camera {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (listener != null) {
+                    for (CameraListener listener : listeners) {
                         if (cameraIsCapturing) {
                             listener.onBulbStarted();
                         } else {
@@ -391,7 +400,7 @@ public abstract class PtpCamera implements Camera {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                if (listener != null) {
+                for (CameraListener listener : listeners) {
                     listener.onObjectAdded(handle, format);
                 }
             }
@@ -403,7 +412,7 @@ public abstract class PtpCamera implements Camera {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (listener != null) {
+                    for (CameraListener listener : listeners) {
                         listener.onBulbExposureTime(seconds);
                     }
                 }
@@ -415,7 +424,7 @@ public abstract class PtpCamera implements Camera {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                if (listener != null) {
+                for (CameraListener listener : listeners) {
                     listener.onFocusStarted();
                 }
             }
@@ -426,7 +435,7 @@ public abstract class PtpCamera implements Camera {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                if (listener != null) {
+                for (CameraListener listener : listeners) {
                     listener.onFocusEnded(hasFocused);
                 }
             }
@@ -467,7 +476,7 @@ public abstract class PtpCamera implements Camera {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                if (listener != null) {
+                for (CameraListener listener : listeners) {
                     listener.onError(message);
                 }
             }
@@ -484,7 +493,7 @@ public abstract class PtpCamera implements Camera {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                if (listener != null) {
+                for (CameraListener listener : listeners) {
                     listener.onError(String.format("Error in USB communication: %s", message));
                 }
             }
@@ -504,6 +513,11 @@ public abstract class PtpCamera implements Camera {
         private UsbRequest r1;
         private UsbRequest r2;
         private UsbRequest r3;
+
+        private UsbRequest ro1;
+        private UsbRequest ro2;
+        private UsbRequest ro3;
+
         private final int bigInSize = 0x4000;
         // buffers for async data io, size bigInSize
         private ByteBuffer bigIn1;
@@ -550,6 +564,10 @@ public abstract class PtpCamera implements Camera {
             r2 = connection.createInRequest();
             r3 = connection.createInRequest();
 
+            ro1 = connection.createOutRequest();
+            ro2 = connection.createOutRequest();
+            ro3 = connection.createOutRequest();
+
             while (true) {
                 synchronized (this) {
                     if (stop) {
@@ -569,6 +587,12 @@ public abstract class PtpCamera implements Camera {
                     // nop
                 }
 
+                if (queue.size() > 49) {
+                    queue.size();
+
+                }
+
+
                 if (action != null) {
                     action.exec(this);
                 }
@@ -576,6 +600,10 @@ public abstract class PtpCamera implements Camera {
             r3.close();
             r2.close();
             r1.close();
+
+            ro3.close();
+            ro2.close();
+            ro1.close();
 
             notifyWorkEnded();
         }
@@ -599,18 +627,49 @@ public abstract class PtpCamera implements Camera {
             }
 
             if (command.hasDataToSend()) {
+
+                int fullOutputLength = outLen;
+
+                //FIXME need to send bigger buffer
+
                 b = ByteBuffer.allocate(connection.getMaxPacketOutSize());
+//5619219
+//81663616
+                //b = ByteBuffer.allocate(81663616);
+
                 b.order(ByteOrder.LITTLE_ENDIAN);
+
+                //FIXME Add flag to parent instead
+                if (command instanceof SendObjectCommand) {
+
+                    fullOutputLength = ((SendObjectCommand) command).getSize();
+                    Log.i(TAG, "fullOutputLength:" + fullOutputLength);
+                }
+                Log.i(TAG, "connection.getMaxPacketInSize():" + connection.getMaxPacketInSize());
+                Log.i(TAG, "connection.getMaxPacketOutSize():" + connection.getMaxPacketOutSize());
+
+
                 command.encodeData(b);
+
+                //FIXME need bigger buffer
+
                 outLen = b.position();
                 res = connection.bulkTransferOut(b.array(), outLen, AppConfig.USB_TRANSFER_TIMEOUT);
+
+                Log.i(TAG, "res:" + res + " outLen:" + outLen);
+
+
                 if (res < outLen) {
                     onUsbError(String.format("Code DP %d %d", res, outLen));
                     return;
                 }
+
+                Log.i(TAG, "!hasResponseReceived");
+
             }
 
             while (!command.hasResponseReceived()) {
+
                 int maxPacketSize = maxPacketInSize;
                 ByteBuffer in = smallIn;
                 in.position(0);
@@ -771,6 +830,21 @@ public abstract class PtpCamera implements Camera {
         return new int[0];
     }
 
+
+    @Override
+    public void sendBitmap(Bitmap bitmap) {
+
+        //FIXME when to send info?
+
+
+        queue.add(new SendObjectCommand(this, bitmap));
+
+
+    }
+
+
+
+
     @Override
     public void setProperty(int property, int value) {
         final Integer ptpProperty = virtualToPtpProperty.get(property);
@@ -866,11 +940,42 @@ public abstract class PtpCamera implements Camera {
     }
 
     @Override
-    //FIXME ok here? or move out?
-    public void saveAndDeletePicture(int objectHandle, String savePath) {
+    public void saveAndDeletePicture(int objectHandle,
+                                     SaveAndDeleteListener listener,
+                                     String directoryPath,
+                                     String filename,
+                                     int jpegCompression) {
 
         Log.i(TAG, "saveAndDeletePicture");
-        queue.add(new SaveAndDeleteAction(this, objectHandle, savePath));
+        queue.add(new SaveAndDeleteAction(this, listener, objectHandle,
+                                        directoryPath, filename, jpegCompression));
+/*
+        if (queue.size() > 49) {
+            Log.i(TAG, "saveAndDeletePicture");
+        }
+        */
+
+    }
+
+
+    @Override
+    public void movePicture(int objectHandle, int storageId, int parentHandle) {
+
+        Log.i(TAG, "movePicture");
+
+        queue.add(new MoveObjectCommand(this, objectHandle, storageId, parentHandle));
+
+    }
+
+    @Override
+    public void setObjectInfoCommand(int objectHandle, ObjectInfo objectInfo) {
+
+        Log.i(TAG, "setObjectInfoCommand");
+
+        objectInfo.filename = "test_app.jpg";
+
+        queue.add(new SetObjectInfoCommand(this, objectHandle, objectInfo));
+
     }
 
     @Override
@@ -897,6 +1002,9 @@ public abstract class PtpCamera implements Camera {
 
     @Override
     public void retrieveImageInfo(RetrieveImageInfoListener listener, int objectHandle) {
+
+        Log.v(TAG, "retrieveImageInfo objectHandle:" + objectHandle);
+
         queue.add(new RetrieveImageInfoAction(this, listener, objectHandle));
     }
 

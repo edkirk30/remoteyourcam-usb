@@ -25,4 +25,5 @@ dependencies {
     //    compile files('libs/acra-4.2.3-sources.jar')
     //    compile files('libs/acra-4.2.3.jar')
     compile 'ch.acra:acra:4.9.0-RC-2'
+    compile 'io.sentry:sentry:1.7.2'
 }

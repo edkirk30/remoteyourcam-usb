@@ -44,8 +44,8 @@ public class NikonCamera extends PtpCamera {
     private boolean gotNikonShutterSpeed;
     private boolean liveViewStoppedInternal;
 
-    public NikonCamera(PtpUsbConnection connection, CameraListener listener, WorkerListener workerListener) {
-        super(connection, listener, workerListener);
+    public NikonCamera(PtpUsbConnection connection, List<CameraListener> listeners, WorkerListener workerListener) {
+        super(connection, listeners, workerListener);
 
         histogramSupported = false;
     }
@@ -76,7 +76,7 @@ public class NikonCamera extends PtpCamera {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (listener != null) {
+                    for (CameraListener listener : listeners) {
                         listener.onFocusPointsChanged();
                     }
                 }

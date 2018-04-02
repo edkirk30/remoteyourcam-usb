@@ -107,6 +107,10 @@ public interface Camera {
         void onImageHandlesRetrieved(int[] handles);
     }
 
+    public interface SaveAndDeleteListener {
+        void onSaveAndDeleteComplete(String filename);
+    }
+
     public interface RetrieveImageInfoListener {
         void onImageInfoRetrieved(int objectHandle, ObjectInfo objectInfo, Bitmap thumbnail);
     }
@@ -181,7 +185,14 @@ public interface Camera {
 
     void deletePicture(int objectHandle);
 
-    void saveAndDeletePicture(int objectHandle, String savePath);
+    void saveAndDeletePicture(int objectHandle, SaveAndDeleteListener listener,
+                              String directoryPath, String filename, int jpegCompression);
+
+    void movePicture(int objectHandle, int storageId, int parentHandle);
+
+   // void changeFilename(int objectHandle, String newFilename);
+
+    void setObjectInfoCommand(int objectHandle, ObjectInfo objectInfo);
 
     void retrieveStorages(StorageInfoListener listener);
 
@@ -190,4 +201,6 @@ public interface Camera {
     void retrieveImageInfo(RetrieveImageInfoListener listener, int objectHandle);
 
     void retrieveImage(RetrieveImageListener listener, int objectHandle);
+
+    void sendBitmap(Bitmap bitmap);
 }

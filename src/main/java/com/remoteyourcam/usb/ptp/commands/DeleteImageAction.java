@@ -28,8 +28,6 @@ public class DeleteImageAction implements PtpAction {
         DeleteObjectCommand getObject = new DeleteObjectCommand(camera, objectHandle);
         io.handleCommand(getObject);
 
-        Log.i("HEREHERHERER", "deleted");
-
         if (getObject.getResponseCode() != PtpConstants.Response.Ok) {
             //listener.onImageRetrieved(0, null);
             Log.i("HEREHERHERER", "deleted response");

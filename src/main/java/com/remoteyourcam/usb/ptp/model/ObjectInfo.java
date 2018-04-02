@@ -15,6 +15,8 @@
  */
 package com.remoteyourcam.usb.ptp.model;
 
+import android.util.Log;
+
 import java.nio.ByteBuffer;
 
 import com.remoteyourcam.usb.ptp.PacketUtil;
@@ -24,6 +26,8 @@ import com.remoteyourcam.usb.ptp.PtpConstants;
  * Object info data set as defined by the PTP standard.
  */
 public class ObjectInfo {
+
+    private final String TAG = ObjectInfo.class.getSimpleName();
 
     public int storageId;
     public int objectFormat;
@@ -53,6 +57,8 @@ public class ObjectInfo {
     }
 
     public void decode(ByteBuffer b, int length) {
+
+
         storageId = b.getInt();
         objectFormat = b.getShort();
         protectionStatus = b.getShort();
@@ -73,6 +79,66 @@ public class ObjectInfo {
         modificationDate = PacketUtil.readString(b);
         keywords = b.get(); // string, not used on camera?
     }
+
+    public void encode(ByteBuffer b) {
+
+
+        b.putInt(storageId);
+        b.putShort((short) objectFormat);
+        b.putShort((short) protectionStatus);
+        b.putInt(objectCompressedSize);
+        b.putShort((short) thumbFormat);
+        b.putInt(thumbCompressedSize);
+        b.putInt(thumbPixWidth);
+        b.putInt(thumbPixHeight);
+        b.putInt(imagePixWidth);
+        b.putInt(imagePixHeight);
+        b.putInt(imageBitDepth);
+        b.putInt(parentObject);
+        b.putShort((short) associationType);
+        b.putInt(associationDesc);
+        b.putInt(sequenceNumber);
+        PacketUtil.writeString(b, filename);
+        PacketUtil.writeString(b, captureDate);
+        PacketUtil.writeString(b, modificationDate);
+        //b.putInt(keywords);
+        PacketUtil.writeString(b, "");
+
+        //b.put(keywords);
+        //objectFormat = b.getShort();
+        //protectionStatus = b.getShort();
+        //objectCompressedSize = b.getInt();
+        //thumbFormat = b.getShort();
+        //thumbCompressedSize = b.getInt();
+        //thumbPixWidth = b.getInt();
+        //thumbPixHeight = b.getInt();
+        //imagePixWidth = b.getInt();
+        //imagePixHeight = b.getInt();
+       // imageBitDepth = b.getInt();
+        //parentObject = b.getInt();
+        //associationType = b.getShort();
+        //associationDesc = b.getInt();
+        //sequenceNumber = b.getInt();
+        //filename = PacketUtil.readString(b);
+        //captureDate = PacketUtil.readString(b);
+        //modificationDate = PacketUtil.readString(b);
+        //keywords = b.get(); // string, not used on camera?
+    }
+
+    public int size() {
+
+        //FIXME hard coded
+        ByteBuffer tempBuffer = ByteBuffer.allocate(512);
+        tempBuffer.position(0);
+
+        this.encode(tempBuffer);
+
+        Log.v(TAG, "tempBuffer.position():" + tempBuffer.position());
+        tempBuffer.position();
+
+        return tempBuffer.position();
+    }
+
 
     @Override
     public String toString() {

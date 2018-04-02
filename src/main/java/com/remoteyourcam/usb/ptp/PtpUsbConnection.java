@@ -45,7 +45,9 @@ public class PtpUsbConnection {
     }
 
     public void close() {
-        connection.close();
+        if (connection != null) {
+            connection.close();
+        }
     }
 
     public int getMaxPacketInSize() {
@@ -61,6 +63,13 @@ public class PtpUsbConnection {
         r.initialize(connection, bulkIn);
         return r;
     }
+
+    public UsbRequest createOutRequest() {
+        UsbRequest r = new UsbRequest();
+        r.initialize(connection, bulkOut);
+        return r;
+    }
+
 
     public int bulkTransferOut(byte[] buffer, int length, int timeout) {
         return connection.bulkTransfer(bulkOut, buffer, length, timeout);

@@ -29,7 +29,7 @@ import com.remoteyourcam.usb.ptp.PtpConstants.Type;
 /**
  * Base class for all PTP commands.
  */
-public abstract class Command implements PtpAction {
+public abstract class Command extends PtpActionClass {
 
     private static final String TAG = "Command";
 
@@ -41,13 +41,6 @@ public abstract class Command implements PtpAction {
      */
     protected boolean hasDataToSend;
 
-    /**
-     * Received response code, should be handled in
-     * {@link #exec(com.remoteyourcam.usb.ptp.PtpCamera.IO)}.
-     */
-    protected int responseCode;
-
-    private boolean hasResponseReceived;
 
     public Command(PtpCamera camera) {
         this.camera = camera;
@@ -89,14 +82,6 @@ public abstract class Command implements PtpAction {
 
     public boolean hasDataToSend() {
         return hasDataToSend;
-    }
-
-    public boolean hasResponseReceived() {
-        return hasResponseReceived;
-    }
-
-    public int getResponseCode() {
-        return responseCode;
     }
 
     public void receivedRead(ByteBuffer b) {

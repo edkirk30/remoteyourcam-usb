@@ -21,6 +21,19 @@ import android.util.Log;
 
 public class PacketUtil {
 
+    /*
+    public static int readU32(ByteBuffer b) {
+        int len = b.getInt();
+        int[] a = new int[len];
+        for (int i = 0; i < len; ++i) {
+            a[i] = b.getInt();
+        }
+        return a;
+    }
+
+*/
+
+
     public static int[] readU32Array(ByteBuffer b) {
         int len = b.getInt();
         int[] a = new int[len];

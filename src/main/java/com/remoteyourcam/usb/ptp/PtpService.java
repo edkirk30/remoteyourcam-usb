@@ -22,7 +22,8 @@ import android.content.Intent;
 
 public interface PtpService {
 
-    void setCameraListener(CameraListener listener);
+//    void setCameraListener(CameraListener listener);
+    void addCameraListener(CameraListener listener);
 
     void initialize(Context context, Intent intent);
 

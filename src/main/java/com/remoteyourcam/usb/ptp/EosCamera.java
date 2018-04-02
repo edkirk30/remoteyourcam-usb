@@ -31,8 +31,8 @@ import com.remoteyourcam.usb.ptp.model.LiveViewData;
 
 public class EosCamera extends PtpCamera {
 
-    public EosCamera(PtpUsbConnection connection, CameraListener listener, WorkerListener workerListener) {
-        super(connection, listener, workerListener);
+    public EosCamera(PtpUsbConnection connection, List<CameraListener> listeners, WorkerListener workerListener) {
+        super(connection, listeners, workerListener);
 
         addPropertyMapping(Camera.Property.ShutterSpeed, PtpConstants.Property.EosShutterSpeed);
         addPropertyMapping(Camera.Property.ApertureValue, PtpConstants.Property.EosApertureValue);

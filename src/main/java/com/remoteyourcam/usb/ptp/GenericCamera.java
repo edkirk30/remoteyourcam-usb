@@ -14,8 +14,8 @@ public class GenericCamera extends PtpCamera {
 
     private Set<Integer> supportedOperations;
 
-    public GenericCamera(PtpUsbConnection connection, CameraListener listener, WorkerListener workerListener) {
-        super(connection, listener, workerListener);
+    public GenericCamera(PtpUsbConnection connection, List<CameraListener> listeners, WorkerListener workerListener) {
+        super(connection, listeners, workerListener);
 
         histogramSupported = false;
     }

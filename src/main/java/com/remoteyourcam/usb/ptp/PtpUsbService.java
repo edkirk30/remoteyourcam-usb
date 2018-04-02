@@ -15,6 +15,9 @@
  */
 package com.remoteyourcam.usb.ptp;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import android.app.PendingIntent;
@@ -27,6 +30,7 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
+import android.location.GpsStatus;
 import android.os.Handler;
 import android.util.Log;
 
@@ -42,6 +46,9 @@ public class PtpUsbService implements PtpService {
     private final BroadcastReceiver permissonReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+
+            Log.i(TAG, "onReceive");
+
             String action = intent.getAction();
             if (ACTION_USB_PERMISSION.equals(action)) {
                 unregisterPermissionReceiver(context);
@@ -49,7 +56,14 @@ public class PtpUsbService implements PtpService {
                     UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
 
                     if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                        connect(context, device);
+                        try {
+                            connect(context, device);
+                        }
+                        catch (java.lang.IllegalArgumentException exception) {
+
+                            Log.e(TAG, "java.lang.IllegalArgumentException exception");
+                            exception.printStackTrace();
+                        }
                     } else {
                         //TODO report
                     }
@@ -61,7 +75,9 @@ public class PtpUsbService implements PtpService {
     private final Handler handler = new Handler();
     private final UsbManager usbManager;
     private PtpCamera camera;
-    private CameraListener listener;
+    //private CameraListener listener;
+
+    private List<CameraListener> listeners = new ArrayList();
 
     Runnable shutdownRunnable = new Runnable() {
         @Override
@@ -72,8 +88,24 @@ public class PtpUsbService implements PtpService {
 
     public PtpUsbService(Context context) {
         this.usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
+
     }
 
+    @Override
+    public void addCameraListener(CameraListener listener) {
+
+        Log.i(TAG, "addCameraListener");
+
+        listeners.add(listener);
+
+        if (camera != null) {
+            camera.addListener(listener);
+        }
+    }
+
+
+
+/*
     @Override
     public void setCameraListener(CameraListener listener) {
         this.listener = listener;
@@ -81,17 +113,30 @@ public class PtpUsbService implements PtpService {
             camera.setListener(listener);
         }
     }
+    */
 
     @Override
     public void initialize(Context context, Intent intent) {
+
+        //Check for stale listeners
+        for (Iterator<CameraListener> iterator = listeners.iterator(); iterator.hasNext();) {
+            CameraListener listener = iterator.next();
+            if (listener == null) {
+                Log.i(TAG, "Removing listening listener == null");
+                iterator.remove();
+            }
+        }
+
         handler.removeCallbacks(shutdownRunnable);
         if (camera != null) {
             if (AppConfig.LOG) {
                 Log.i(TAG, "initialize: camera available");
             }
             if (camera.getState() == State.Active) {
-                if (listener != null) {
-                    listener.onCameraStarted(camera);
+                if (!listeners.isEmpty()) {
+                    for (CameraListener listener : listeners) {
+                        listener.onCameraStarted(camera);
+                    }
                 }
                 return;
             }
@@ -117,7 +162,10 @@ public class PtpUsbService implements PtpService {
                         ACTION_USB_PERMISSION), 0);
                 usbManager.requestPermission(device, mPermissionIntent);
             } else {
-                listener.onNoCameraFound();
+
+                for (CameraListener listener : listeners) {
+                    listener.onNoCameraFound();
+                }
             }
         }
     }
@@ -206,27 +254,33 @@ public class PtpUsbService implements PtpService {
                 Log.i(TAG, "Bulk in max size " + in.getMaxPacketSize());
             }
 
+            if (!usbManager.hasPermission(device)) {
+                return false;
+            }
+
             if (device.getVendorId() == PtpConstants.CanonVendorId) {
                 PtpUsbConnection connection = new PtpUsbConnection(usbManager.openDevice(device), in, out,
                         device.getVendorId(), device.getProductId());
-                camera = new EosCamera(connection, listener, new WorkerNotifier(context));
+                camera = new EosCamera(connection, listeners, new WorkerNotifier(context));
             } else if (device.getVendorId() == PtpConstants.NikonVendorId) {
                 PtpUsbConnection connection = new PtpUsbConnection(usbManager.openDevice(device), in, out,
                         device.getVendorId(), device.getProductId());
-                camera = new NikonCamera(connection, listener, new WorkerNotifier(context));
+                camera = new NikonCamera(connection, listeners, new WorkerNotifier(context));
             }
             else {
                 PtpUsbConnection connection = new PtpUsbConnection(usbManager.openDevice(device), in, out,
                         device.getVendorId(), device.getProductId());
-                camera = new GenericCamera(connection, listener, new WorkerNotifier(context));
+                camera = new GenericCamera(connection, listeners, new WorkerNotifier(context));
 
             }
 
             return true;
         }
 
-        if (listener != null) {
-            listener.onError("No compatible camera found");
+        if (!listeners.isEmpty()) {
+            for (CameraListener listener : listeners) {
+                listener.onError("No compatible camera found");
+            }
         }
 
         return false;
