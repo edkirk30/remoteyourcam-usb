@@ -24,6 +24,8 @@ import com.remoteyourcam.usb.ptp.PtpConstants.Operation;
 import com.remoteyourcam.usb.ptp.PtpConstants.Response;
 import com.remoteyourcam.usb.ptp.model.DeviceInfo;
 
+import io.sentry.Sentry;
+
 public class GetDeviceInfoCommand extends Command {
 
     private DeviceInfo info;
@@ -35,6 +37,9 @@ public class GetDeviceInfoCommand extends Command {
     @Override
     public void exec(IO io) {
         io.handleCommand(this);
+
+        Sentry.capture("GetDeviceInfoCommand responseCode:" + responseCode);
+
         if (responseCode != Response.Ok) {
             camera.onPtpError(String.format("Couldn't read device information, error code \"%s\"",
                     PtpConstants.responseToString(responseCode)));

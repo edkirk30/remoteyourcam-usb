@@ -29,10 +29,14 @@ import com.remoteyourcam.usb.ptp.commands.eos.EosSetPropertyCommand;
 import com.remoteyourcam.usb.ptp.commands.eos.EosTakePictureCommand;
 import com.remoteyourcam.usb.ptp.model.LiveViewData;
 
+import io.sentry.Sentry;
+
 public class EosCamera extends PtpCamera {
 
     public EosCamera(PtpUsbConnection connection, List<CameraListener> listeners, WorkerListener workerListener) {
         super(connection, listeners, workerListener);
+
+        Sentry.capture("EosCamera");
 
         addPropertyMapping(Camera.Property.ShutterSpeed, PtpConstants.Property.EosShutterSpeed);
         addPropertyMapping(Camera.Property.ApertureValue, PtpConstants.Property.EosApertureValue);

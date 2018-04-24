@@ -62,6 +62,8 @@ import com.remoteyourcam.usb.ptp.model.DevicePropDesc;
 import com.remoteyourcam.usb.ptp.model.LiveViewData;
 import com.remoteyourcam.usb.ptp.model.ObjectInfo;
 
+import io.sentry.Sentry;
+
 public abstract class PtpCamera implements Camera {
 
     public interface IO {
@@ -446,10 +448,16 @@ public abstract class PtpCamera implements Camera {
         if (AppConfig.LOG) {
             Log.i(TAG, "onDeviceBusy, sleeping a bit");
         }
+
+        Sentry.capture("onDeviceBusy");
+
+        /*
         if (requeue) {
             action.reset();
             queue.add(action);
         }
+        */
+
         try {
             Thread.sleep(200);
         } catch (InterruptedException e) {

@@ -33,10 +33,13 @@ import android.hardware.usb.UsbManager;
 import android.location.GpsStatus;
 import android.os.Handler;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.remoteyourcam.usb.AppConfig;
 import com.remoteyourcam.usb.ptp.Camera.CameraListener;
 import com.remoteyourcam.usb.ptp.PtpCamera.State;
+
+import io.sentry.Sentry;
 
 public class PtpUsbService implements PtpService {
 
@@ -49,9 +52,14 @@ public class PtpUsbService implements PtpService {
 
             Log.i(TAG, "onReceive");
 
+            //Toast toast = Toast.makeText(context, "PtpUsbService onReceive", Toast.LENGTH_LONG);
+            //toast.show();
+
             String action = intent.getAction();
             if (ACTION_USB_PERMISSION.equals(action)) {
+
                 unregisterPermissionReceiver(context);
+
                 synchronized (this) {
                     UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
 
@@ -118,6 +126,9 @@ public class PtpUsbService implements PtpService {
     @Override
     public void initialize(Context context, Intent intent) {
 
+        //Toast toast = Toast.makeText(context, "USB connected (intent)", Toast.LENGTH_LONG);
+        //toast.show();
+
         //Check for stale listeners
         for (Iterator<CameraListener> iterator = listeners.iterator(); iterator.hasNext();) {
             CameraListener listener = iterator.next();
@@ -128,6 +139,7 @@ public class PtpUsbService implements PtpService {
         }
 
         handler.removeCallbacks(shutdownRunnable);
+
         if (camera != null) {
             if (AppConfig.LOG) {
                 Log.i(TAG, "initialize: camera available");
@@ -145,23 +157,50 @@ public class PtpUsbService implements PtpService {
             }
             camera.shutdownHard();
         }
+
         UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-        if (device != null) {
+        if (false && device != null) {
+
+            //Toast toast2 = Toast.makeText(context, "got device through intent", Toast.LENGTH_LONG);
+            //toast2.show();
+
             if (AppConfig.LOG) {
                 Log.i(TAG, "initialize: got device through intent");
             }
             connect(context, device);
         } else {
+/*
+            if (true) {
+                Toast toast2 = Toast.makeText(context, "Did NOT get device through intent", Toast.LENGTH_LONG);
+                toast2.show();
+            }
+            */
+
+            //Toast toast20 = Toast.makeText(context, "Did NOT get device through intent", Toast.LENGTH_LONG);
+            //toast20.show();
+
             if (AppConfig.LOG) {
                 Log.i(TAG, "initialize: looking for compatible camera");
             }
-            device = lookupCompatibleDevice(usbManager);
+            device = lookupCompatibleDevice(usbManager, context);
+
             if (device != null) {
+
+                //Toast toast4 = Toast.makeText(context, "Device NOT null", Toast.LENGTH_LONG);
+                //toast4.show();
+
                 registerPermissionReceiver(context);
                 PendingIntent mPermissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(
                         ACTION_USB_PERMISSION), 0);
                 usbManager.requestPermission(device, mPermissionIntent);
+
+                //Toast toast5 = Toast.makeText(context, "after usbManager.requestPermission", Toast.LENGTH_LONG);
+                //toast5.show();
+
             } else {
+
+                //Toast toast6 = Toast.makeText(context, "Device null", Toast.LENGTH_LONG);
+                //toast6.show();
 
                 for (CameraListener listener : listeners) {
                     listener.onNoCameraFound();
@@ -204,10 +243,15 @@ public class PtpUsbService implements PtpService {
         context.unregisterReceiver(permissonReceiver);
     }
 
-    private UsbDevice lookupCompatibleDevice(UsbManager manager) {
+    private UsbDevice lookupCompatibleDevice(UsbManager manager, Context context) {
         Map<String, UsbDevice> deviceList = manager.getDeviceList();
         for (Map.Entry<String, UsbDevice> e : deviceList.entrySet()) {
+
             UsbDevice d = e.getValue();
+
+            //Toast toast4 = Toast.makeText(context, "d.getVendorId():" + d.getVendorId(), Toast.LENGTH_LONG);
+            //toast4.show();
+
             if (d.getVendorId() == PtpConstants.CanonVendorId || d.getVendorId() == PtpConstants.NikonVendorId) {
                 return d;
             }
@@ -216,10 +260,15 @@ public class PtpUsbService implements PtpService {
     }
 
     private boolean connect(Context context, UsbDevice device) {
+
         if (camera != null) {
             camera.shutdown();
             camera = null;
         }
+
+        //Toast toast1 = Toast.makeText(context, "device.getInterfaceCount:" + device.getInterfaceCount(), Toast.LENGTH_LONG);
+        //toast1.show();
+
         for (int i = 0, n = device.getInterfaceCount(); i < n; ++i) {
             UsbInterface intf = device.getInterface(i);
 
@@ -232,6 +281,10 @@ public class PtpUsbService implements PtpService {
 
             for (int e = 0, en = intf.getEndpointCount(); e < en; ++e) {
                 UsbEndpoint endpoint = intf.getEndpoint(e);
+
+                //Toast toast2 = Toast.makeText(context, "endpoint.getType():" + endpoint.getType(), Toast.LENGTH_LONG);
+                //toast2.show();
+
                 if (endpoint.getType() == UsbConstants.USB_ENDPOINT_XFER_BULK) {
                     if (endpoint.getDirection() == UsbConstants.USB_DIR_IN) {
                         in = endpoint;
@@ -242,6 +295,7 @@ public class PtpUsbService implements PtpService {
             }
 
             if (in == null || out == null) {
+                Sentry.capture("in == null || out == null");
                 continue;
             }
 
@@ -255,10 +309,20 @@ public class PtpUsbService implements PtpService {
             }
 
             if (!usbManager.hasPermission(device)) {
+
+                //Toast toast = Toast.makeText(context, "!usbManager.hasPermission(device)", Toast.LENGTH_LONG);
+                //toast.show();
+
+                Sentry.capture("!usbManager.hasPermission(device)");
                 return false;
             }
 
             if (device.getVendorId() == PtpConstants.CanonVendorId) {
+
+                //Toast toast = Toast.makeText(context, "device.getVendorId() == PtpConstants.CanonVendorId", Toast.LENGTH_LONG);
+                //toast.show();
+
+                Sentry.capture("device.getVendorId() == PtpConstants.CanonVendorId");
                 PtpUsbConnection connection = new PtpUsbConnection(usbManager.openDevice(device), in, out,
                         device.getVendorId(), device.getProductId());
                 camera = new EosCamera(connection, listeners, new WorkerNotifier(context));
@@ -268,6 +332,7 @@ public class PtpUsbService implements PtpService {
                 camera = new NikonCamera(connection, listeners, new WorkerNotifier(context));
             }
             else {
+                Sentry.capture("ELSE device.getVendorId() == PtpConstants.CanonVendorId");
                 PtpUsbConnection connection = new PtpUsbConnection(usbManager.openDevice(device), in, out,
                         device.getVendorId(), device.getProductId());
                 camera = new GenericCamera(connection, listeners, new WorkerNotifier(context));
